@@ -1,0 +1,41 @@
+anchors:
+  entrypoint_default: &entrypoint_default [
+    "time"
+  ]
+  cloudwatch_event_targets_default: &cloudwatch_event_targets_default
+    arn:      ${data.aws_ecs_cluster.default.arn}
+    role_arn: ${data.aws_iam_role.ecsEventsRole.arn}
+    ecs_target:
+      launch_type:         FARGATE
+      platform_version:    1.4.0
+      task_definition_arn: 'arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}'
+      network_configuration:
+        subnets:          ${data.aws_subnet_ids.public.ids}
+#       subnets:
+#         - subnet_id
+#         - subnet_id
+#         - ...
+        security_groups:  ${data.aws_security_groups.internal.ids}
+#       security_groups:
+#         - security_group_id
+#         - security_group_id
+#         - ...
+        assign_public_ip: true
+
+events:
+  - name: hello-world
+    description: |-
+      hello-world
+    is_enabled: true
+    schedule:
+      minutes:      0
+      hours:        0
+      day_of_weeks: MON-FRI
+    cloudwatch_event_target: *cloudwatch_event_targets_default
+    container_overrides:
+      - name:       hello-world
+        entrypoint: *entrypoint_default
+        command:    ["/bin/ash", "-c", "echo $MESSAGE"]
+        environment:
+          - name:  MESSAGE
+            value: hello-world
