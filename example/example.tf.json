@@ -35,88 +35,83 @@
     "aws_cloudwatch_event_target": {
       "hello-world-0": {
         "arn": "${data.aws_ecs_cluster.default.arn}",
-        "rule": "${aws_cloudwatch_event_rule.hello-world-0.name}",
-        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
         "ecs_target": {
           "launch_type": "FARGATE",
-          "platform_version": "1.4.0",
-          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}",
           "network_configuration": {
-            "subnets": "${data.aws_subnet_ids.public.ids}",
+            "assign_public_ip": true,
             "security_groups": "${data.aws_security_groups.internal.ids}",
-            "assign_public_ip": true
-          }
+            "subnets": "${data.aws_subnet_ids.public.ids}"
+          },
+          "platform_version": "1.4.0",
+          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}"
         },
-        "target_id": "hello-world",
-        "input": "{\"containerOverrides\":[{\"name\":\"hello-world\",\"command\":[\"time\",\"/bin/ash\",\"-c\",\"echo $MESSAGE\"],\"environment\":[{\"name\":\"MESSAGE\",\"value\":\"hello-world\"},{\"name\":\"CRON_SCHEDULE\",\"value\":\"0 0 ? * MON-FRI *\"},{\"name\":\"CRON_DESCRIPTION\",\"value\":\"hello-world\"}]}]}"
+        "input": "{\n  \"containerOverrides\": [\n    {\n      \"name\":       \"hello-world\",\n      \"entrypoint\": [\"time\"],\n      \"command\":    [\"/bin/ash\", \"-c\", \"echo $MESSAGE\"],\n      \"environment\" [\n        {\n          \"name\":  \"MESSAGE\",\n          \"value\": \"hello-world\"\n        }\n      ]\n    }\n  ]\n}",
+        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
+        "rule": "${aws_cloudwatch_event_rule.hello-world-0.name}"
       },
       "hello-world-1": {
         "arn": "${data.aws_ecs_cluster.default.arn}",
-        "rule": "${aws_cloudwatch_event_rule.hello-world-1.name}",
-        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
         "ecs_target": {
           "launch_type": "FARGATE",
-          "platform_version": "1.4.0",
-          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}",
           "network_configuration": {
-            "subnets": "${data.aws_subnet_ids.public.ids}",
+            "assign_public_ip": true,
             "security_groups": "${data.aws_security_groups.internal.ids}",
-            "assign_public_ip": true
-          }
+            "subnets": "${data.aws_subnet_ids.public.ids}"
+          },
+          "platform_version": "1.4.0",
+          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}"
         },
-        "target_id": "hello-world",
-        "input": "{\"containerOverrides\":[{\"name\":\"hello-world\",\"command\":[\"time\",\"/bin/ash\",\"-c\",\"echo $MESSAGE\"],\"environment\":[{\"name\":\"MESSAGE\",\"value\":\"hello-world\"},{\"name\":\"CRON_SCHEDULE\",\"value\":\"0 0 ? * MON-FRI *\"},{\"name\":\"CRON_DESCRIPTION\",\"value\":\"hello-world\"}]}]}"
+        "input": "{\n  \"containerOverrides\": [\n    {\n      \"name\":       \"hello-world\",\n      \"entrypoint\": [\"time\"],\n      \"command\":    [\"/bin/ash\", \"-c\", \"echo $MESSAGE\"],\n      \"environment\" [\n        {\n          \"name\":  \"MESSAGE\",\n          \"value\": \"hello-world\"\n        }\n      ]\n    }\n  ]\n}",
+        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
+        "rule": "${aws_cloudwatch_event_rule.hello-world-1.name}"
       },
       "hello-world-2": {
         "arn": "${data.aws_ecs_cluster.default.arn}",
-        "rule": "${aws_cloudwatch_event_rule.hello-world-2.name}",
-        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
         "ecs_target": {
           "launch_type": "FARGATE",
-          "platform_version": "1.4.0",
-          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}",
           "network_configuration": {
-            "subnets": "${data.aws_subnet_ids.public.ids}",
+            "assign_public_ip": true,
             "security_groups": "${data.aws_security_groups.internal.ids}",
-            "assign_public_ip": true
-          }
+            "subnets": "${data.aws_subnet_ids.public.ids}"
+          },
+          "platform_version": "1.4.0",
+          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}"
         },
-        "target_id": "hello-world",
-        "input": "{\"containerOverrides\":[{\"name\":\"hello-world\",\"command\":[\"time\",\"/bin/ash\",\"-c\",\"echo $MESSAGE\"],\"environment\":[{\"name\":\"MESSAGE\",\"value\":\"hello-world\"},{\"name\":\"CRON_SCHEDULE\",\"value\":\"0 0 ? * MON-FRI *\"},{\"name\":\"CRON_DESCRIPTION\",\"value\":\"hello-world\"}]}]}"
+        "input": "{\n  \"containerOverrides\": [\n    {\n      \"name\":       \"hello-world\",\n      \"entrypoint\": [\"time\"],\n      \"command\":    [\"/bin/ash\", \"-c\", \"echo $MESSAGE\"],\n      \"environment\" [\n        {\n          \"name\":  \"MESSAGE\",\n          \"value\": \"hello-world\"\n        }\n      ]\n    }\n  ]\n}",
+        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
+        "rule": "${aws_cloudwatch_event_rule.hello-world-2.name}"
       },
       "hello-world-3": {
         "arn": "${data.aws_ecs_cluster.default.arn}",
-        "rule": "${aws_cloudwatch_event_rule.hello-world-3.name}",
-        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
         "ecs_target": {
           "launch_type": "FARGATE",
-          "platform_version": "1.4.0",
-          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}",
           "network_configuration": {
-            "subnets": "${data.aws_subnet_ids.public.ids}",
+            "assign_public_ip": true,
             "security_groups": "${data.aws_security_groups.internal.ids}",
-            "assign_public_ip": true
-          }
+            "subnets": "${data.aws_subnet_ids.public.ids}"
+          },
+          "platform_version": "1.4.0",
+          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}"
         },
-        "target_id": "hello-world",
-        "input": "{\"containerOverrides\":[{\"name\":\"hello-world\",\"command\":[\"time\",\"/bin/ash\",\"-c\",\"echo $MESSAGE\"],\"environment\":[{\"name\":\"MESSAGE\",\"value\":\"hello-world\"},{\"name\":\"CRON_SCHEDULE\",\"value\":\"0 0 ? * MON-FRI *\"},{\"name\":\"CRON_DESCRIPTION\",\"value\":\"hello-world\"}]}]}"
+        "input": "{\n  \"containerOverrides\": [\n    {\n      \"name\":       \"hello-world\",\n      \"entrypoint\": [\"time\"],\n      \"command\":    [\"/bin/ash\", \"-c\", \"echo $MESSAGE\"],\n      \"environment\" [\n        {\n          \"name\":  \"MESSAGE\",\n          \"value\": \"hello-world\"\n        }\n      ]\n    }\n  ]\n}",
+        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
+        "rule": "${aws_cloudwatch_event_rule.hello-world-3.name}"
       },
       "hello-world-4": {
         "arn": "${data.aws_ecs_cluster.default.arn}",
-        "rule": "${aws_cloudwatch_event_rule.hello-world-4.name}",
-        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
         "ecs_target": {
           "launch_type": "FARGATE",
-          "platform_version": "1.4.0",
-          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}",
           "network_configuration": {
-            "subnets": "${data.aws_subnet_ids.public.ids}",
+            "assign_public_ip": true,
             "security_groups": "${data.aws_security_groups.internal.ids}",
-            "assign_public_ip": true
-          }
+            "subnets": "${data.aws_subnet_ids.public.ids}"
+          },
+          "platform_version": "1.4.0",
+          "task_definition_arn": "arn:aws:ecs:ap-northeast-1:${data.aws_caller_identity.current.account_id}:task-definition/${data.aws_ecs_task_definition.hello-world.family}"
         },
-        "target_id": "hello-world",
-        "input": "{\"containerOverrides\":[{\"name\":\"hello-world\",\"command\":[\"time\",\"/bin/ash\",\"-c\",\"echo $MESSAGE\"],\"environment\":[{\"name\":\"MESSAGE\",\"value\":\"hello-world\"},{\"name\":\"CRON_SCHEDULE\",\"value\":\"0 0 ? * MON-FRI *\"},{\"name\":\"CRON_DESCRIPTION\",\"value\":\"hello-world\"}]}]}"
+        "input": "{\n  \"containerOverrides\": [\n    {\n      \"name\":       \"hello-world\",\n      \"entrypoint\": [\"time\"],\n      \"command\":    [\"/bin/ash\", \"-c\", \"echo $MESSAGE\"],\n      \"environment\" [\n        {\n          \"name\":  \"MESSAGE\",\n          \"value\": \"hello-world\"\n        }\n      ]\n    }\n  ]\n}",
+        "role_arn": "${data.aws_iam_role.ecsEventsRole.arn}",
+        "rule": "${aws_cloudwatch_event_rule.hello-world-4.name}"
       }
     }
   }
