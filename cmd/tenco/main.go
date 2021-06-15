@@ -12,7 +12,7 @@ import (
 
 var (
 	defaultOffset    = -9
-	defaultGenerator = &tenco.JsonGenerator{}
+	defaultGenerator = &tenco.JSONGenerator{}
 )
 
 func main() {
