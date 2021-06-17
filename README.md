@@ -1,10 +1,16 @@
 # tenco
 
+## Description
+
+tenco は terraform での cloudwatch events の設定を補助するツールです
+
+cloudwatch eventsのcron式はUTCを強制されるのでJSTでの動作を期待する場合、時差を考慮する必要があります
+
+ref:[ルールのスケジュール式 - Amazon CloudWatch Events](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/events/ScheduledEvents.html)
+
+tenco は `minutes` `hours` `day_of_weeks` の３つの入力に絞り時差を考慮しつつcron式に直してtf.jsonを生成します
+
 ## Synopsis
-
-cron式はUTCを強制されるのでJSTでの動作を期待する場合、時差を考慮する必要があります
-
-tencoは `minutes` `hours` `day_of_weeks` の３つの入力に絞り時差を考慮しつつcron式に直してtf.jsonを生成します
 
 ### e.g. JSTで月曜日の0時
 
