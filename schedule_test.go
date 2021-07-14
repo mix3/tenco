@@ -10,6 +10,14 @@ import (
 )
 
 func TestMinutes(t *testing.T) {
+	asterisc := tenco.Minutes{
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+		20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+		30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+		40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+		50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+	}
 	cases := []struct {
 		input  string
 		err    bool
@@ -32,28 +40,36 @@ func TestMinutes(t *testing.T) {
 			err:   true,
 		},
 		{
+			input: "*-4",
+			err:   true,
+		},
+		{
+			input: "*/0",
+			err:   true,
+		},
+		{
 			input:  "",
-			expect: tenco.Minutes(""),
+			expect: asterisc,
 		},
 		{
 			input:  "*",
-			expect: tenco.Minutes("*"),
+			expect: asterisc,
 		},
 		{
-			input:  "1/4",
-			expect: tenco.Minutes("1/4"),
+			input:  "3/12",
+			expect: tenco.Minutes{3, 15, 27, 39, 51},
 		},
 		{
 			input:  "1-4",
-			expect: tenco.Minutes("1-4"),
+			expect: tenco.Minutes{1, 2, 3, 4},
 		},
 		{
-			input:  "*-4",
-			expect: tenco.Minutes("*-4"),
+			input:  "*/9",
+			expect: tenco.Minutes{0, 9, 18, 27, 36, 45, 54},
 		},
 		{
-			input:  "*,*-4,*/9",
-			expect: tenco.Minutes("*,*-4,*/9"),
+			input:  "1,5-9,50/3",
+			expect: tenco.Minutes{1, 5, 6, 7, 8, 9, 50, 53, 56, 59},
 		},
 	}
 	for i, c := range cases {
@@ -78,6 +94,7 @@ func TestMinutes(t *testing.T) {
 }
 
 func TestHours(t *testing.T) {
+	asterisc := tenco.Hours{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
 	cases := []struct {
 		input  string
 		err    bool
@@ -104,16 +121,20 @@ func TestHours(t *testing.T) {
 			err:   true,
 		},
 		{
-			input: "*/4",
+			input: "*/0",
 			err:   true,
 		},
 		{
+			input:  "*/4",
+			expect: tenco.Hours{0, 4, 8, 12, 16, 20},
+		},
+		{
 			input:  "",
-			expect: tenco.Hours{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+			expect: asterisc,
 		},
 		{
 			input:  "*",
-			expect: tenco.Hours{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+			expect: asterisc,
 		},
 		{
 			input:  "1,5,9",
@@ -222,6 +243,19 @@ func TestDayOfWeeks(t *testing.T) {
 }
 
 func TestCronExprs(t *testing.T) {
+	minutesAsterisc := [][]int{
+		{
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+			10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+			20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+			30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+			40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+			50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+		},
+	}
+	hoursAsterisc := [][]int{
+		{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+	}
 	cases := []struct {
 		minutes    string
 		hours      string
@@ -237,10 +271,8 @@ func TestCronExprs(t *testing.T) {
 			offset:     0,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "",
-					Hours: [][]int{
-						{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
-					},
+					Minutes:   minutesAsterisc,
+					Hours:     hoursAsterisc,
 					DayOfWeek: 0,
 				},
 			},
@@ -252,7 +284,7 @@ func TestCronExprs(t *testing.T) {
 			offset:     0,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "",
+					Minutes: minutesAsterisc,
 					Hours: [][]int{
 						{0},
 					},
@@ -267,7 +299,9 @@ func TestCronExprs(t *testing.T) {
 			offset:     0,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "0",
+					Minutes: [][]int{
+						{0},
+					},
 					Hours: [][]int{
 						{0},
 					},
@@ -282,7 +316,7 @@ func TestCronExprs(t *testing.T) {
 			offset:     -9,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "",
+					Minutes: minutesAsterisc,
 					Hours: [][]int{
 						{15},
 					},
@@ -297,7 +331,9 @@ func TestCronExprs(t *testing.T) {
 			offset:     -9,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "0",
+					Minutes: [][]int{
+						{0},
+					},
 					Hours: [][]int{
 						{15},
 					},
@@ -312,18 +348,55 @@ func TestCronExprs(t *testing.T) {
 			offset:     -9,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "0",
+					Minutes: [][]int{
+						{0},
+					},
 					Hours: [][]int{
 						{23},
 					},
 					DayOfWeek: 1,
 				},
 				{
-					Minutes: "0",
+					Minutes: [][]int{
+						{0},
+					},
 					Hours: [][]int{
 						{0},
 					},
 					DayOfWeek: 2,
+				},
+			},
+		},
+		{
+			minutes: "55-5",
+			hours:   "",
+			offset:  -9,
+			expect: []tenco.CronExpr{
+				{
+					Minutes: [][]int{
+						{0, 1, 2, 3, 4, 5},
+						{55, 56, 57, 58, 59},
+					},
+					Hours:     hoursAsterisc,
+					DayOfWeek: 0,
+				},
+			},
+		},
+		{
+			minutes: "55-5",
+			hours:   "4-13",
+			offset:  -9,
+			expect: []tenco.CronExpr{
+				{
+					Minutes: [][]int{
+						{0, 1, 2, 3, 4, 5},
+						{55, 56, 57, 58, 59},
+					},
+					Hours: [][]int{
+						{0, 1, 2, 3, 4},
+						{19, 20, 21, 22, 23},
+					},
+					DayOfWeek: 0,
 				},
 			},
 		},
@@ -334,42 +407,46 @@ func TestCronExprs(t *testing.T) {
 			offset:     -9,
 			expect: []tenco.CronExpr{
 				{
-					Minutes: "0",
+					Minutes: [][]int{
+						{0},
+					},
 					Hours: [][]int{
 						{15, 16, 17, 18, 19, 20, 21, 22, 23},
 					},
 					DayOfWeek: 1,
 				},
 				{
-					Minutes: "0",
-					Hours: [][]int{
-						{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+					Minutes: [][]int{
+						{0},
 					},
+					Hours:     hoursAsterisc,
 					DayOfWeek: 2,
 				},
 				{
-					Minutes: "0",
-					Hours: [][]int{
-						{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+					Minutes: [][]int{
+						{0},
 					},
+					Hours:     hoursAsterisc,
 					DayOfWeek: 3,
 				},
 				{
-					Minutes: "0",
-					Hours: [][]int{
-						{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+					Minutes: [][]int{
+						{0},
 					},
+					Hours:     hoursAsterisc,
 					DayOfWeek: 4,
 				},
 				{
-					Minutes: "0",
-					Hours: [][]int{
-						{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+					Minutes: [][]int{
+						{0},
 					},
+					Hours:     hoursAsterisc,
 					DayOfWeek: 5,
 				},
 				{
-					Minutes: "0",
+					Minutes: [][]int{
+						{0},
+					},
 					Hours: [][]int{
 						{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
 					},

@@ -31,7 +31,7 @@ func (g *JSONGenerator) Generate(w io.Writer, conf Config, offset int) error {
 		AWSCloudWatchEventTarget: map[string]map[string]interface{}{},
 	}
 	for _, event := range conf.Events {
-		for i, expr := range event.Schedule.CronExprs(offset) {
+		for i, expr := range event.Schedule.CWCronExprs(offset) {
 			eventName := fmt.Sprintf("%s-%d", event.Name, i)
 			r.AWSCloudWatchEventRule[eventName] = EventRule{
 				Name:               eventName,
