@@ -19,7 +19,7 @@ func (c CWCronExpr) String() string {
 	} else {
 		var tmp []string
 		for _, v := range c.Minutes {
-			if len(v) == 59 {
+			if len(v) == 60 {
 				tmp = append(tmp, "*")
 			} else if 1 < len(v) {
 				tmp = append(tmp, fmt.Sprintf("%d-%d", v[0], v[len(v)-1]))
@@ -79,7 +79,7 @@ func (c CronExpr) String() string {
 	} else {
 		var tmp []string
 		for _, v := range c.Minutes {
-			if len(v) == 59 {
+			if len(v) == 60 {
 				tmp = append(tmp, "*")
 			} else if 1 < len(v) {
 				tmp = append(tmp, fmt.Sprintf("%d-%d", v[0], v[len(v)-1]))
