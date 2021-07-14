@@ -74,11 +74,44 @@ func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+func (s *Schedule) CWCronExprs(offset int) []CWCronExpr {
+	if len(s.DayOfWeeks) == 0 {
+		return []CWCronExpr{
+			{
+				Minutes: s.Minutes.unique().merge(),
+				Hours:   s.Hours.offset(offset).unique().merge(),
+			},
+		}
+	}
+
+	merge := make(map[DayOfWeek]Hours, 7)
+	vecToHours := s.Hours.offsetWithVec(offset)
+	for _, dow := range s.DayOfWeeks {
+		for vec, hours := range vecToHours {
+			w := dow.shift(vec)
+			merge[w] = append(merge[w], hours...)
+		}
+	}
+
+	ret := make([]CWCronExpr, 0, 7)
+	for i := 1; i <= 7; i++ {
+		w := DayOfWeek(i)
+		if v, ok := merge[w]; ok {
+			ret = append(ret, CWCronExpr{
+				Minutes:   s.Minutes.unique().merge(),
+				Hours:     v.unique().merge(),
+				DayOfWeek: i,
+			})
+		}
+	}
+	return ret
+}
+
 func (s *Schedule) CronExprs(offset int) []CronExpr {
 	if len(s.DayOfWeeks) == 0 {
 		return []CronExpr{
 			{
-				Minutes: string(s.Minutes),
+				Minutes: s.Minutes.unique().merge(),
 				Hours:   s.Hours.offset(offset).unique().merge(),
 			},
 		}
@@ -98,7 +131,7 @@ func (s *Schedule) CronExprs(offset int) []CronExpr {
 		w := DayOfWeek(i)
 		if v, ok := merge[w]; ok {
 			ret = append(ret, CronExpr{
-				Minutes:   string(s.Minutes),
+				Minutes:   s.Minutes.unique().merge(),
 				Hours:     v.unique().merge(),
 				DayOfWeek: i,
 			})
@@ -107,7 +140,55 @@ func (s *Schedule) CronExprs(offset int) []CronExpr {
 	return ret
 }
 
-type Minutes string
+type Minute int
+
+type Minutes []Minute
+
+func (ms Minutes) raw() []int {
+	ret := make([]int, 0, len(ms))
+	for _, m := range ms {
+		ret = append(ret, int(m))
+	}
+	return ret
+}
+
+func (ms *Minutes) add(i int) error {
+	if i < 0 || 60 <= i {
+		return fmt.Errorf("minutes allow range [0-59]")
+	}
+	*ms = append(*ms, Minute(i))
+	return nil
+}
+
+func (ms Minutes) unique() Minutes {
+	ret := make(Minutes, 0, len(ms))
+	dup := make(map[Minute]struct{}, len(ms))
+	for _, m := range ms {
+		if _, ok := dup[m]; !ok {
+			ret = append(ret, m)
+			dup[m] = struct{}{}
+		}
+	}
+	return ret
+}
+
+func (ms Minutes) merge() [][]int {
+	minutes := ms.raw()
+	sort.Ints(minutes)
+	ret := make([][]int, 0, len(minutes))
+	tmp := make([]int, 0, 60)
+	for _, m := range minutes {
+		if len(tmp) == 0 || tmp[len(tmp)-1]+1 == int(m) {
+			tmp = append(tmp, int(m))
+		} else {
+			ret = append(ret, tmp)
+			tmp = make([]int, 0, 60)
+			tmp = append(tmp, int(m))
+		}
+	}
+	ret = append(ret, tmp)
+	return ret
+}
 
 func (ms *Minutes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var str string
@@ -115,46 +196,65 @@ func (ms *Minutes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	// validate
+	// "" "*" -> 0,1,2,...
+	if str == "" || str == "*" {
+		for i := 0; i < 60; i++ {
+			ms.add(i)
+		}
+		return nil
+	}
+
 	for _, v := range strings.Split(str, ",") {
 		switch {
-		// n-m, *-m
+		// n-m 1-5  -> 1,2,3,4,5
+		//     59-1 -> 59,0,1
 		case dashReg.MatchString(v):
 			r := strings.Split(v, "-")
-			if r[0] != "*" {
-				if _, err := strconv.Atoi(r[0]); err != nil {
-					return fmt.Errorf("parse start minutes failed. %q:%q %w", str, v, err)
-				}
+			start, err := strconv.Atoi(r[0])
+			if err != nil {
+				return fmt.Errorf("parse start minutes failed. %q:%q %w", str, v, err)
 			}
-			if _, err := strconv.Atoi(r[1]); err != nil {
+			end, err := strconv.Atoi(r[1])
+			if err != nil {
 				return fmt.Errorf("parse end minutes failed. %q:%q %w", str, v, err)
 			}
-		// n/m, */m
+			for _, v := range loopRange(start, end, 0, 59) {
+				if err := ms.add(v); err != nil {
+					return fmt.Errorf("parse minutes failed. %q:%q %w", str, v, err)
+				}
+			}
+		// n/m 55/2 -> 55,57,59
+		// */m */25 -> 0,25,50
 		case slashReg.MatchString(v):
 			r := strings.Split(v, "/")
+			var start int
 			if r[0] != "*" {
-				if _, err := strconv.Atoi(r[0]); err != nil {
+				var err error
+				start, err = strconv.Atoi(r[0])
+				if err != nil {
 					return fmt.Errorf("parse start minutes failed. %q:%q %w", str, v, err)
 				}
 			}
-			if _, err := strconv.Atoi(r[1]); err != nil {
+			incr, err := strconv.Atoi(r[1])
+			if err != nil || incr == 0 {
 				return fmt.Errorf("parse increment minutes failed. %q:%q %w", str, v, err)
 			}
-		// n, *
-		default:
-			if v != "" && v != "*" {
-				i, err := strconv.Atoi(v)
-				if err != nil {
+			for i := start; i < 60; i += incr {
+				if err := ms.add(i); err != nil {
 					return fmt.Errorf("parse minutes failed. %q:%q %w", str, v, err)
 				}
-				if i < 0 || 60 <= i {
-					return fmt.Errorf("hours allow range [0-59]")
-				}
+			}
+		// n 1 -> 1
+		default:
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				return fmt.Errorf("parse minutes failed. %q:%q %w", str, v, err)
+			}
+			if err := ms.add(i); err != nil {
+				return fmt.Errorf("parse minutes failed. %q:%q %w", str, v, err)
 			}
 		}
 	}
-
-	*ms = Minutes(str)
 
 	return nil
 }
@@ -224,14 +324,19 @@ func (hs *Hours) UnmarshalYAML(unmarshal func(interface{}) error) error {
 				}
 			}
 		// n/m 19/2 -> 19,21,23
+		// */m */10 -> 0,10,20
 		case slashReg.MatchString(v):
 			r := strings.Split(v, "/")
-			start, err := strconv.Atoi(r[0])
-			if err != nil {
-				return fmt.Errorf("parse start hours failed. %q:%q %w", str, v, err)
+			var start int
+			if r[0] != "*" {
+				var err error
+				start, err = strconv.Atoi(r[0])
+				if err != nil {
+					return fmt.Errorf("parse start hours failed. %q:%q %w", str, v, err)
+				}
 			}
 			incr, err := strconv.Atoi(r[1])
-			if err != nil {
+			if err != nil || incr == 0 {
 				return fmt.Errorf("parse increment hours failed. %q:%q %w", str, v, err)
 			}
 			for i := start; i < 24; i += incr {
