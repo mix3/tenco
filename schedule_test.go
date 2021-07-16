@@ -82,9 +82,7 @@ func TestMinutes(t *testing.T) {
 			continue
 		}
 		if c.err {
-			if err == nil {
-				t.Errorf("[%d] test failed", i)
-			}
+			t.Errorf("[%d] test failed", i)
 			continue
 		}
 		if g, w := s.Minutes, c.expect; !reflect.DeepEqual(g, w) {
@@ -171,9 +169,7 @@ func TestHours(t *testing.T) {
 			continue
 		}
 		if c.err {
-			if err == nil {
-				t.Errorf("[%d] test failed", i)
-			}
+			t.Errorf("[%d] test failed", i)
 			continue
 		}
 		if g, w := s.Hours, c.expect; !reflect.DeepEqual(g, w) {
@@ -231,9 +227,7 @@ func TestDayOfWeeks(t *testing.T) {
 			continue
 		}
 		if c.err {
-			if err == nil {
-				t.Errorf("[%d] test failed", i)
-			}
+			t.Errorf("[%d] test failed", i)
 			continue
 		}
 		if g, w := s.DayOfWeeks, c.expect; !reflect.DeepEqual(g, w) {
@@ -470,9 +464,7 @@ day_of_weeks: "%s"
 			continue
 		}
 		if c.err {
-			if err == nil {
-				t.Errorf("[%d] test failed", i)
-			}
+			t.Errorf("[%d] test failed", i)
 			continue
 		}
 		if g, w := s.CronExprs(c.offset), c.expect; !reflect.DeepEqual(g, w) {

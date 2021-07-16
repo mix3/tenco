@@ -9,16 +9,10 @@ import (
 )
 
 type Schedule struct {
-	Minutes      Minutes
-	Hours        Hours
-	DayOfWeeks   DayOfWeeks
-	OrigSchedule OrigSchedule
-}
-
-type schedule struct {
-	Minutes    Minutes    `yaml:"minutes"`
-	Hours      Hours      `yaml:"hours"`
-	DayOfWeeks DayOfWeeks `yaml:"day_of_weeks"`
+	Minutes      Minutes      `yaml:"minutes"`
+	Hours        Hours        `yaml:"hours"`
+	DayOfWeeks   DayOfWeeks   `yaml:"day_of_weeks"`
+	OrigSchedule OrigSchedule `yaml:"-"`
 }
 
 type OrigSchedule struct {
@@ -57,6 +51,7 @@ func (o OrigSchedule) String() string {
 }
 
 func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type schedule Schedule
 	var ret schedule
 	if err := unmarshal(&ret); err != nil {
 		return err
@@ -65,12 +60,8 @@ func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&orig); err != nil {
 		return err
 	}
-	*s = Schedule{
-		Minutes:      ret.Minutes,
-		Hours:        ret.Hours,
-		DayOfWeeks:   ret.DayOfWeeks,
-		OrigSchedule: orig,
-	}
+	ret.OrigSchedule = orig
+	*s = Schedule(ret)
 	return nil
 }
 
