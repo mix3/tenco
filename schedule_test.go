@@ -236,6 +236,149 @@ func TestDayOfWeeks(t *testing.T) {
 	}
 }
 
+func TestSchedule(t *testing.T) {
+	minutesAsterisc := tenco.Minutes{
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+		20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+		30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+		40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+		50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+	}
+	hoursAsterisc := tenco.Hours{
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+	}
+	cases := []struct {
+		input  string
+		expect tenco.Schedule
+	}{
+		{
+			input: `
+minutes:      ""
+`,
+			expect: tenco.Schedule{
+				Minutes:    minutesAsterisc,
+				Hours:      hoursAsterisc,
+				DayOfWeeks: nil,
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "",
+					Hours:      "",
+					DayOfWeeks: "",
+				},
+			},
+		},
+		{
+			input: `
+hours:        ""
+`,
+			expect: tenco.Schedule{
+				Minutes:    minutesAsterisc,
+				Hours:      hoursAsterisc,
+				DayOfWeeks: nil,
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "",
+					Hours:      "",
+					DayOfWeeks: "",
+				},
+			},
+		},
+		{
+			input: `
+day_of_weeks: ""
+`,
+			expect: tenco.Schedule{
+				Minutes:    minutesAsterisc,
+				Hours:      hoursAsterisc,
+				DayOfWeeks: nil,
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "",
+					Hours:      "",
+					DayOfWeeks: "",
+				},
+			},
+		},
+		{
+			input: `
+minutes:      ""
+hours:        ""
+day_of_weeks: ""
+`,
+			expect: tenco.Schedule{
+				Minutes:    minutesAsterisc,
+				Hours:      hoursAsterisc,
+				DayOfWeeks: nil,
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "",
+					Hours:      "",
+					DayOfWeeks: "",
+				},
+			},
+		},
+		{
+			input: `
+minutes:      "0"
+hours:        "0"
+day_of_weeks: "SUN"
+`,
+			expect: tenco.Schedule{
+				Minutes:    tenco.Minutes{0},
+				Hours:      tenco.Hours{0},
+				DayOfWeeks: tenco.DayOfWeeks{1},
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "0",
+					Hours:      "0",
+					DayOfWeeks: "SUN",
+				},
+			},
+		},
+		{
+			input: `
+minutes:      "0"
+hours:        "8,9"
+day_of_weeks: "MON"
+`,
+			expect: tenco.Schedule{
+				Minutes:    tenco.Minutes{0},
+				Hours:      tenco.Hours{8, 9},
+				DayOfWeeks: tenco.DayOfWeeks{2},
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "0",
+					Hours:      "8,9",
+					DayOfWeeks: "MON",
+				},
+			},
+		},
+		{
+			input: `
+minutes:      "55-5"
+hours:        "4-13"
+day_of_weeks: "MON-FRI"
+`,
+			expect: tenco.Schedule{
+				Minutes:    tenco.Minutes{55, 56, 57, 58, 59, 0, 1, 2, 3, 4, 5},
+				Hours:      tenco.Hours{4, 5, 6, 7, 8, 9, 10, 11, 12, 13},
+				DayOfWeeks: tenco.DayOfWeeks{2, 3, 4, 5, 6},
+				OrigSchedule: tenco.OrigSchedule{
+					Minutes:    "55-5",
+					Hours:      "4-13",
+					DayOfWeeks: "MON-FRI",
+				},
+			},
+		},
+	}
+	for i, c := range cases {
+		var s tenco.Schedule
+		err := yaml.Unmarshal([]byte(c.input), &s)
+		if err != nil {
+			t.Errorf("[%d] test failed. %s", i, err)
+			continue
+		}
+		if g, w := s, c.expect; !reflect.DeepEqual(g, w) {
+			t.Errorf("[%d] test faield. want %+v, but got %+v", i, w, g)
+		}
+	}
+}
+
 func TestCronExprs(t *testing.T) {
 	minutesAsterisc := [][]int{
 		{
@@ -251,18 +394,16 @@ func TestCronExprs(t *testing.T) {
 		{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
 	}
 	cases := []struct {
-		minutes    string
-		hours      string
-		dayOfWeeks string
-		offset     int
-		err        bool
-		expect     []tenco.CronExpr
+		input  string
+		offset int
+		err    bool
+		expect []tenco.CronExpr
 	}{
 		{
-			minutes:    "",
-			hours:      "",
-			dayOfWeeks: "",
-			offset:     0,
+			input: `
+minutes:      ""
+`,
+			offset: 0,
 			expect: []tenco.CronExpr{
 				{
 					Minutes:   minutesAsterisc,
@@ -272,10 +413,53 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes:    "",
-			hours:      "0",
-			dayOfWeeks: "",
-			offset:     0,
+			input: `
+hours:        ""
+`,
+			offset: 0,
+			expect: []tenco.CronExpr{
+				{
+					Minutes:   minutesAsterisc,
+					Hours:     hoursAsterisc,
+					DayOfWeek: 0,
+				},
+			},
+		},
+		{
+			input: `
+day_of_weeks: ""
+`,
+			offset: 0,
+			expect: []tenco.CronExpr{
+				{
+					Minutes:   minutesAsterisc,
+					Hours:     hoursAsterisc,
+					DayOfWeek: 0,
+				},
+			},
+		},
+		{
+			input: `
+minutes:      ""
+hours:        ""
+day_of_weeks: ""
+`,
+			offset: 0,
+			expect: []tenco.CronExpr{
+				{
+					Minutes:   minutesAsterisc,
+					Hours:     hoursAsterisc,
+					DayOfWeek: 0,
+				},
+			},
+		},
+		{
+			input: `
+minutes:      ""
+hours:        "0"
+day_of_weeks: ""
+`,
+			offset: 0,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: minutesAsterisc,
@@ -287,10 +471,12 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes:    "0",
-			hours:      "0",
-			dayOfWeeks: "SUN",
-			offset:     0,
+			input: `
+minutes:      "0"
+hours:        "0"
+day_of_weeks: "SUN"
+`,
+			offset: 0,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: [][]int{
@@ -304,10 +490,12 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes:    "",
-			hours:      "0",
-			dayOfWeeks: "",
-			offset:     -9,
+			input: `
+minutes:      ""
+hours:        "0"
+day_of_weeks: ""
+`,
+			offset: -9,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: minutesAsterisc,
@@ -319,10 +507,12 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes:    "0",
-			hours:      "0",
-			dayOfWeeks: "SUN",
-			offset:     -9,
+			input: `
+minutes:      "0"
+hours:        "0"
+day_of_weeks: "SUN"
+`,
+			offset: -9,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: [][]int{
@@ -336,10 +526,12 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes:    "0",
-			hours:      "8,9",
-			dayOfWeeks: "MON",
-			offset:     -9,
+			input: `
+minutes:      "0"
+hours:        "8,9"
+day_of_weeks: "MON"
+`,
+			offset: -9,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: [][]int{
@@ -362,9 +554,11 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes: "55-5",
-			hours:   "",
-			offset:  -9,
+			input: `
+minutes:      "55-5"
+hours:        ""
+`,
+			offset: -9,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: [][]int{
@@ -377,9 +571,11 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes: "55-5",
-			hours:   "4-13",
-			offset:  -9,
+			input: `
+minutes:      "55-5"
+hours:        "4-13"
+`,
+			offset: -9,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: [][]int{
@@ -395,10 +591,11 @@ func TestCronExprs(t *testing.T) {
 			},
 		},
 		{
-			minutes:    "0",
-			hours:      "*",
-			dayOfWeeks: "MON-FRI",
-			offset:     -9,
+			input: `
+minutes:      "0"
+day_of_weeks: "MON-FRI"
+`,
+			offset: -9,
 			expect: []tenco.CronExpr{
 				{
 					Minutes: [][]int{
@@ -451,12 +648,7 @@ func TestCronExprs(t *testing.T) {
 	}
 	for i, c := range cases {
 		var s tenco.Schedule
-		input := fmt.Sprintf(`
-minutes:      "%s"
-hours:        "%s"
-day_of_weeks: "%s"
-`, c.minutes, c.hours, c.dayOfWeeks)
-		err := yaml.Unmarshal([]byte(input), &s)
+		err := yaml.Unmarshal([]byte(c.input), &s)
 		if err != nil {
 			if !c.err {
 				t.Errorf("[%d] test failed. %s", i, err)

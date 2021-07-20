@@ -56,6 +56,12 @@ func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&ret); err != nil {
 		return err
 	}
+	if len(ret.Minutes) == 0 {
+		ret.Minutes.asterisc()
+	}
+	if len(ret.Hours) == 0 {
+		ret.Hours.asterisc()
+	}
 	var orig OrigSchedule
 	if err := unmarshal(&orig); err != nil {
 		return err
@@ -181,6 +187,14 @@ func (ms Minutes) merge() [][]int {
 	return ret
 }
 
+func (ms *Minutes) asterisc() {
+	ret := make(Minutes, 60)
+	for i := Minute(0); i < 60; i++ {
+		ret[i] = i
+	}
+	*ms = ret
+}
+
 func (ms *Minutes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var str string
 	if err := unmarshal(&str); err != nil {
@@ -189,10 +203,7 @@ func (ms *Minutes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	// "" "*" -> 0,1,2,...
 	if str == "" || str == "*" {
-		for i := 0; i < 60; i++ {
-			ms.add(i)
-		}
-		return nil
+		return nil // ScheduleのUnmarshalYAMLで埋めるのでここでは何もしない
 	}
 
 	for _, v := range strings.Split(str, ",") {
@@ -289,10 +300,7 @@ func (hs *Hours) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	// "" "*" -> 0,1,2,...
 	if str == "" || str == "*" {
-		for i := 0; i < 24; i++ {
-			hs.add(i)
-		}
-		return nil
+		return nil // ScheduleのUnmarshalYAMLで埋めるのでここでは何もしない
 	}
 
 	for _, v := range strings.Split(str, ",") {
@@ -404,6 +412,14 @@ func (hs Hours) merge() [][]int {
 	}
 	ret = append(ret, tmp)
 	return ret
+}
+
+func (hs *Hours) asterisc() {
+	ret := make(Hours, 24)
+	for i := Hour(0); i < 24; i++ {
+		ret[i] = i
+	}
+	*hs = ret
 }
 
 type DayOfWeek int
